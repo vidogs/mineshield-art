@@ -1,17 +1,19 @@
 import './App.css'
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
 import {useMemo, useState} from 'react'
-import type {User, Comment} from './types'
-import {initialPosts, initialComments, mockViewer} from './data/mockData'
+import type {Comment} from './types'
+import {initialPosts, initialComments} from './data/mockData'
 import {calculateTrendingTags} from './utils/postUtils'
 import {Header} from './components/Header'
 import {FeedPage} from './pages/FeedPage'
 import {PostPage} from './pages/PostPage'
+import {AuthCallbackPage} from './pages/AuthCallbackPage'
+import {useAuth} from './providers/AuthProvider'
 
 function App() {
     const [posts, setPosts] = useState(initialPosts)
     const [comments, setComments] = useState(initialComments)
-    const [user, setUser] = useState<User | null>(null)
+    const { user, signInWithTwitch, signOut } = useAuth()
 
     const trendingTags = useMemo(() => calculateTrendingTags(posts), [posts])
 
@@ -41,8 +43,21 @@ function App() {
         })
     }
 
-    const handleLogin = () => setUser(mockViewer)
-    const handleLogout = () => setUser(null)
+    const handleLogin = async () => {
+        try {
+            await signInWithTwitch()
+        } catch (error) {
+            console.error('Login error:', error)
+        }
+    }
+
+    const handleLogout = async () => {
+        try {
+            await signOut()
+        } catch (error) {
+            console.error('Logout error:', error)
+        }
+    }
 
     return (
         <BrowserRouter>
@@ -72,6 +87,10 @@ function App() {
                                     onAddComment={handleAddComment}
                                 />
                             }
+                        />
+                        <Route
+                            path="/auth/callback"
+                            element={<AuthCallbackPage />}
                         />
                         <Route
                             path="*"
