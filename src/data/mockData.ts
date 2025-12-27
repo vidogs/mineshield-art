@@ -20,10 +20,20 @@ export const initialPosts: Post[] = [
     {
         id: 'post-1',
         title: 'Лунная охота',
-        summary: 'Городские огни и заброшенная станция метро в оттенках магии.',
+        content: {
+            blocks: [
+                {
+                    type: 'image',
+                    url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
+                    alt: 'Городские огни и заброшенная станция метро',
+                },
+                {
+                    type: 'text',
+                    content: 'Городские огни и заброшенная станция метро в оттенках магии.',
+                },
+            ],
+        },
         author: mockAuthor,
-        imageUrl:
-            'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
         publishedAt: '2025-12-20T20:45:00Z',
         tags: ['digital', 'night', 'city'],
         taggedUsers: ['@nomad', '@pixelMuse'],
@@ -33,10 +43,24 @@ export const initialPosts: Post[] = [
     {
         id: 'post-2',
         title: 'Шепот волн',
-        summary: 'Сказочные отражения в воде. Отметила друзей за идея во время лайва.',
+        content: {
+            blocks: [
+                {
+                    type: 'text',
+                    content: 'Сегодня была невероятная съемка на берегу моря.',
+                },
+                {
+                    type: 'image',
+                    url: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80',
+                    alt: 'Сказочные отражения в воде',
+                },
+                {
+                    type: 'text',
+                    content: 'Сказочные отражения в воде. Отметила друзей за идея во время лайва.',
+                },
+            ],
+        },
         author: mockAuthor,
-        imageUrl:
-            'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80',
         publishedAt: '2025-12-22T17:10:00Z',
         tags: ['sea', 'composition', 'live'],
         taggedUsers: ['@oceanic', '@wildwind'],
@@ -46,10 +70,25 @@ export const initialPosts: Post[] = [
     {
         id: 'post-3',
         title: 'Сквозь красную дымку',
-        summary: 'Экспериментальный рассказ о градиентах и тайнах ночного города.',
+        content: {
+            blocks: [
+                {
+                    type: 'image',
+                    url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80',
+                    alt: 'Ночной город в красных тонах',
+                },
+                {
+                    type: 'text',
+                    content: 'Экспериментальный рассказ о градиентах и тайнах ночного города.',
+                },
+                {
+                    type: 'image',
+                    url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
+                    alt: 'Дополнительное изображение',
+                },
+            ],
+        },
         author: mockAuthor,
-        imageUrl:
-            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80',
         publishedAt: '2025-12-25T09:05:00Z',
         tags: ['synthwave', 'nsfw', 'experimental'],
         taggedUsers: ['@neonBloom'],

@@ -55,10 +55,19 @@ export function PostCard({post, user, onVote, commentCount = 0}: PostCardProps) 
                 </Link>
                 <div className="post-content-wrapper">
                     <div className={`post-content ${post.nsfw && !revealed ? 'nsfw-blurred' : ''}`}>
-                        <div className="post-image">
-                            <img src={post.imageUrl} alt={post.title} />
-                        </div>
-                        <p>{post.summary}</p>
+                        {post.content.blocks.map((block, index) => {
+                            if (block.type === 'image') {
+                                return (
+                                    <div key={index} className="post-image">
+                                        <img src={block.url} alt={block.alt || post.title} />
+                                    </div>
+                                )
+                            } else {
+                                return (
+                                    <p key={index}>{block.content}</p>
+                                )
+                            }
+                        })}
                         <div className="tag-row">
                             {post.tags.map((tag) => (
                                 <Link key={tag} to={`/tags/${tag}`} className="tag-link">

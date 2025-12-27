@@ -80,9 +80,19 @@ export function PostPage({posts, user, onVote, comments, onAddComment}: PostPage
                 </header>
                 <div className="post-detail-content-wrapper">
                     <div className={`post-detail-content ${post.nsfw && !revealed ? 'nsfw-blurred' : ''}`}>
-                        <div className="post-detail-media">
-                            <img src={post.imageUrl} alt={post.title} />
-                        </div>
+                        {post.content.blocks.map((block, index) => {
+                            if (block.type === 'image') {
+                                return (
+                                    <div key={index} className="post-detail-media">
+                                        <img src={block.url} alt={block.alt || post.title} />
+                                    </div>
+                                )
+                            } else {
+                                return (
+                                    <p key={index} className="post-detail-summary">{block.content}</p>
+                                )
+                            }
+                        })}
                         <div className="post-detail-tags">
                             {post.tags.map((tag) => (
                                 <Link key={tag} to={`/tags/${tag}`} className="tag-link">
@@ -90,7 +100,6 @@ export function PostPage({posts, user, onVote, comments, onAddComment}: PostPage
                                 </Link>
                             ))}
                         </div>
-                        <p className="post-detail-summary">{post.summary}</p>
                         <div className="tagged-row highlight">
                             <span className="tagged-label">Отмечены на фото:</span>
                             {post.taggedUsers.map((userHandle, index) => (
