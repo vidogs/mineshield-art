@@ -73,6 +73,7 @@ function App() {
                                     user={user}
                                     onVote={handleVote}
                                     trendingTags={trendingTags}
+                                    comments={comments}
                                 />
                             }
                         />
@@ -100,6 +101,7 @@ function App() {
                                     user={user}
                                     onVote={handleVote}
                                     trendingTags={trendingTags}
+                                    comments={comments}
                                 />
                             }
                         />

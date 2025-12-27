@@ -1,4 +1,4 @@
-import type {Post, User} from '../types'
+import type {Post, User, Comment} from '../types'
 import {PostCard} from '../components/PostCard'
 
 type FeedPageProps = {
@@ -6,14 +6,21 @@ type FeedPageProps = {
     user: User | null
     onVote: (id: string, delta: number) => void
     trendingTags: string[]
+    comments: Record<string, Comment[]>
 }
 
-export function FeedPage({posts, user, onVote, trendingTags}: FeedPageProps) {
+export function FeedPage({posts, user, onVote, trendingTags, comments}: FeedPageProps) {
     return (
         <div className="feed-grid">
             <section className="feed-list">
                 {posts.map((post) => (
-                    <PostCard key={post.id} post={post} user={user} onVote={onVote} />
+                    <PostCard 
+                        key={post.id} 
+                        post={post} 
+                        user={user} 
+                        onVote={onVote}
+                        commentCount={comments[post.id]?.length ?? 0}
+                    />
                 ))}
             </section>
             <aside className="feed-sidebar">

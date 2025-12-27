@@ -1,5 +1,5 @@
 import {FormEvent, useState} from 'react'
-import {useParams, useNavigate} from 'react-router-dom'
+import {useParams, useNavigate, Link} from 'react-router-dom'
 import type {Post, User, Comment} from '../types'
 import {formatPostDetailDate, formatCommentDate} from '../utils/dateUtils'
 
@@ -60,14 +60,22 @@ export function PostPage({posts, user, onVote, comments, onAddComment}: PostPage
                             {formatPostDetailDate(post.publishedAt)}
                         </p>
                     </div>
-                    <div className="rating-controls">
-                        <button type="button" onClick={() => handleVote(1)} disabled={!canInteract}>
-                            +
-                        </button>
-                        <span>{post.rating}</span>
-                        <button type="button" onClick={() => handleVote(-1)} disabled={!canInteract}>
-                            –
-                        </button>
+                    <div className="post-detail-header-controls">
+                        <div className="rating-controls">
+                            <button type="button" onClick={() => handleVote(1)} disabled={!canInteract}>
+                                +
+                            </button>
+                            <span>{post.rating}</span>
+                            <button type="button" onClick={() => handleVote(-1)} disabled={!canInteract}>
+                                –
+                            </button>
+                        </div>
+                        {postComments.length > 0 && (
+                            <span className="comment-count-static">
+                                <span>💬</span>
+                                <span>{postComments.length}</span>
+                            </span>
+                        )}
                     </div>
                 </header>
                 <div className="post-detail-content-wrapper">
@@ -77,12 +85,22 @@ export function PostPage({posts, user, onVote, comments, onAddComment}: PostPage
                         </div>
                         <div className="post-detail-tags">
                             {post.tags.map((tag) => (
-                                <span key={tag}>{tag}</span>
+                                <Link key={tag} to={`/tags/${tag}`} className="tag-link">
+                                    {tag}
+                                </Link>
                             ))}
                         </div>
                         <p className="post-detail-summary">{post.summary}</p>
                         <div className="tagged-row highlight">
-                            Отмечены на фото: {post.taggedUsers.join(', ')}
+                            <span className="tagged-label">Отмечены на фото:</span>
+                            {post.taggedUsers.map((userHandle, index) => (
+                                <span key={userHandle}>
+                                    <Link to={`/users/${userHandle.replace('@', '')}`} className="tagged-user-link">
+                                        {userHandle}
+                                    </Link>
+                                    {index < post.taggedUsers.length - 1 && ', '}
+                                </span>
+                            ))}
                         </div>
                     </div>
                     {post.nsfw && !revealed && (
