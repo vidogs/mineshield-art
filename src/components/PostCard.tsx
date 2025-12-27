@@ -1,7 +1,7 @@
 import {useState, useMemo} from 'react'
 import {Link} from 'react-router-dom'
 import type {Post, User} from '../types'
-import {formatPostDate} from '../utils/dateUtils'
+import {formatPostDate, formatPostDetailDate} from '../utils/dateUtils'
 import {ImageModal} from './ImageModal'
 
 type PostCardProps = {
@@ -9,9 +9,10 @@ type PostCardProps = {
     user: User | null
     onVote: (id: string, delta: number) => void
     commentCount?: number
+    isDetail?: boolean
 }
 
-export function PostCard({post, user, onVote, commentCount = 0}: PostCardProps) {
+export function PostCard({post, user, onVote, commentCount = 0, isDetail = false}: PostCardProps) {
     const [revealed, setRevealed] = useState(!post.nsfw)
     const [modalOpen, setModalOpen] = useState(false)
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -39,7 +40,7 @@ export function PostCard({post, user, onVote, commentCount = 0}: PostCardProps) 
         setModalOpen(true)
     }
 
-    const formattedDate = formatPostDate(post.publishedAt)
+    const formattedDate = isDetail ? formatPostDetailDate(post.publishedAt) : formatPostDate(post.publishedAt)
 
     return (
         <article className="post-card">
@@ -62,17 +63,27 @@ export function PostCard({post, user, onVote, commentCount = 0}: PostCardProps) 
                                 –
                             </button>
                         </div>
-                        {commentCount > 0 && (
+                        {!isDetail && commentCount > 0 && (
                             <Link to={`/posts/${post.id}`} className="comment-count-link">
                                 <span>💬</span>
                                 <span>{commentCount}</span>
                             </Link>
                         )}
+                        {isDetail && commentCount > 0 && (
+                            <span className="comment-count-static">
+                                <span>💬</span>
+                                <span>{commentCount}</span>
+                            </span>
+                        )}
                     </div>
                 </header>
-                <Link to={`/posts/${post.id}`}>
-                    <h2>{post.title}</h2>
-                </Link>
+                {isDetail ? (
+                    <h1>{post.title}</h1>
+                ) : (
+                    <Link to={`/posts/${post.id}`}>
+                        <h2>{post.title}</h2>
+                    </Link>
+                )}
                 <div className="post-content-wrapper">
                     <div className={`post-content ${post.nsfw && !revealed ? 'nsfw-blurred' : ''}`}>
                         {post.content.blocks.map((block, index) => {
@@ -100,8 +111,8 @@ export function PostCard({post, user, onVote, commentCount = 0}: PostCardProps) 
                                 </Link>
                             ))}
                         </div>
-                        <div className="tagged-row">
-                            <span className="tagged-label">Отмечены:</span>
+                        <div className={`tagged-row ${isDetail ? 'highlight' : ''}`}>
+                            <span className="tagged-label">{isDetail ? 'Отмечены на фото:' : 'Отмечены:'}</span>
                             {post.taggedUsers.map((userHandle, index) => (
                                 <span key={userHandle}>
                                     <Link to={`/users/${userHandle.replace('@', '')}`} className="tagged-user-link">
