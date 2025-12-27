@@ -1,54 +1,94 @@
 import './App.css'
-import { useConfig } from './hooks/useConfig.ts';
 import {useApi} from "./hooks/useApi.ts";
-import {useEffect, useState} from "react";
+import {useConfig} from "./hooks/useConfig.ts";
+import {useAppState} from "./store/appStore.ts";
+import {useEffect} from "react";
+
+function formatError(value: unknown): string {
+    if (typeof value === "string") {
+        return value
+    }
+
+    if (value instanceof Error) {
+        return value.message
+    }
+
+    try {
+        return JSON.stringify(value)
+    } catch {
+        return "Unknown error"
+    }
+}
 
 function App() {
     const config = useConfig()
     const api = useApi()
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-    const [error, setError] = useState<unknown>(null)
+    const {
+        error,
+        isLoading,
+        testResponse,
+        setError,
+        setIsLoading,
+        setTestResponse,
+    } = useAppState()
 
     useEffect(() => {
-        (async () => {
+        let isCancelled = false
+
+        const loadData = async () => {
+            setIsLoading(true)
+            setError(null)
+            setTestResponse(null)
+
             try {
-                const testResponse = await api.test()
+                const response = await api.test()
 
-                console.log(testResponse)
+                if (isCancelled) {
+                    return
+                }
 
-                setError(null)
+                setTestResponse(response.response ?? null)
             } catch (e) {
-                setError(e)
+                if (isCancelled) {
+                    return
+                }
+
+                setError(formatError(e))
+            } finally {
+                if (!isCancelled) {
+                    setIsLoading(false)
+                }
             }
+        }
 
-            setIsLoading(false)
-        })()
-    }, [config, api])
+        void loadData()
 
-    if(error) {
-        return (
-            <div>Error: {error + ""}</div>
-        )
+        return () => {
+            isCancelled = true
+        }
+    }, [api, setError, setIsLoading, setTestResponse])
+
+    if (error) {
+        return <div>Error: {error}</div>
     }
 
-    if(isLoading) {
-        return (
-            <div>Loading...</div>
-        )
+    if (isLoading) {
+        return <div>Loading...</div>
     }
 
     return (
-        <div>Result</div>
+        <div>
+            <p>Base API: {config.baseApiUrl}</p>
+            <p>
+                Result:{" "}
+                {testResponse ? (
+                    <code>{JSON.stringify(testResponse)}</code>
+                ) : (
+                    "No data returned yet"
+                )}
+            </p>
+        </div>
     )
-}
-
-async function copyToClipboard(text: string): Promise<void> {
-    try {
-        await navigator.clipboard.writeText(text);
-        console.log("Copied to clipboard");
-    } catch (err) {
-        console.error("Failed to copy:", err);
-    }
 }
 
 export default App
