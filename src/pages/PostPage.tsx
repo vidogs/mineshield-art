@@ -1,7 +1,8 @@
-import {FormEvent, useState} from 'react'
+import {FormEvent, useState, useMemo} from 'react'
 import {useParams, useNavigate, Link} from 'react-router-dom'
 import type {Post, User, Comment} from '../types'
 import {formatPostDetailDate, formatCommentDate} from '../utils/dateUtils'
+import {ImageModal} from '../components/ImageModal'
 
 type PostPageProps = {
     posts: Post[]
@@ -18,6 +19,8 @@ export function PostPage({posts, user, onVote, comments, onAddComment}: PostPage
 
     const [commentText, setCommentText] = useState('')
     const [revealed, setRevealed] = useState(!post?.nsfw)
+    const [modalOpen, setModalOpen] = useState(false)
+    const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
     if (!post) {
         return (
@@ -32,6 +35,23 @@ export function PostPage({posts, user, onVote, comments, onAddComment}: PostPage
 
     const postComments = comments[post.id] ?? []
     const canInteract = Boolean(user)
+
+    const images = useMemo(() => 
+        post.content.blocks.filter((block): block is Extract<typeof block, {type: 'image'}> => 
+            block.type === 'image'
+        ), 
+        [post.content.blocks]
+    )
+
+    const handleImageClick = (event: React.MouseEvent<HTMLImageElement>, index: number) => {
+        event.stopPropagation()
+        const imageIndex = post.content.blocks
+            .slice(0, index + 1)
+            .filter(block => block.type === 'image')
+            .length - 1
+        setCurrentImageIndex(imageIndex)
+        setModalOpen(true)
+    }
 
     const handleVote = (delta: number) => {
         onVote(post.id, delta)
@@ -84,7 +104,12 @@ export function PostPage({posts, user, onVote, comments, onAddComment}: PostPage
                             if (block.type === 'image') {
                                 return (
                                     <div key={index} className="post-detail-media">
-                                        <img src={block.url} alt={block.alt || post.title} />
+                                        <img 
+                                            src={block.url} 
+                                            alt={block.alt || post.title}
+                                            onClick={(e) => handleImageClick(e, index)}
+                                            style={{cursor: 'pointer'}}
+                                        />
                                     </div>
                                 )
                             } else {
@@ -156,6 +181,14 @@ export function PostPage({posts, user, onVote, comments, onAddComment}: PostPage
                     </div>
                 </div>
             </div>
+            {modalOpen && images.length > 0 && (
+                <ImageModal
+                    images={images}
+                    currentIndex={currentImageIndex}
+                    onClose={() => setModalOpen(false)}
+                    onNavigate={setCurrentImageIndex}
+                />
+            )}
         </section>
     )
 }

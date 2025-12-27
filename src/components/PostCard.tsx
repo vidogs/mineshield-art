@@ -1,7 +1,8 @@
-import {useState} from 'react'
+import {useState, useMemo} from 'react'
 import {Link} from 'react-router-dom'
 import type {Post, User} from '../types'
 import {formatPostDate} from '../utils/dateUtils'
+import {ImageModal} from './ImageModal'
 
 type PostCardProps = {
     post: Post
@@ -12,11 +13,30 @@ type PostCardProps = {
 
 export function PostCard({post, user, onVote, commentCount = 0}: PostCardProps) {
     const [revealed, setRevealed] = useState(!post.nsfw)
+    const [modalOpen, setModalOpen] = useState(false)
+    const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+    const images = useMemo(() => 
+        post.content.blocks.filter((block): block is Extract<typeof block, {type: 'image'}> => 
+            block.type === 'image'
+        ), 
+        [post.content.blocks]
+    )
 
     const handleVote = (delta: number) => {
         if (user) {
             onVote(post.id, delta)
         }
+    }
+
+    const handleImageClick = (event: React.MouseEvent<HTMLImageElement>, index: number) => {
+        event.stopPropagation()
+        const imageIndex = post.content.blocks
+            .slice(0, index + 1)
+            .filter(block => block.type === 'image')
+            .length - 1
+        setCurrentImageIndex(imageIndex)
+        setModalOpen(true)
     }
 
     const formattedDate = formatPostDate(post.publishedAt)
@@ -59,7 +79,12 @@ export function PostCard({post, user, onVote, commentCount = 0}: PostCardProps) 
                             if (block.type === 'image') {
                                 return (
                                     <div key={index} className="post-image">
-                                        <img src={block.url} alt={block.alt || post.title} />
+                                        <img 
+                                            src={block.url} 
+                                            alt={block.alt || post.title}
+                                            onClick={(e) => handleImageClick(e, index)}
+                                            style={{cursor: 'pointer'}}
+                                        />
                                     </div>
                                 )
                             } else {
@@ -97,6 +122,14 @@ export function PostCard({post, user, onVote, commentCount = 0}: PostCardProps) 
                     )}
                 </div>
             </div>
+            {modalOpen && images.length > 0 && (
+                <ImageModal
+                    images={images}
+                    currentIndex={currentImageIndex}
+                    onClose={() => setModalOpen(false)}
+                    onNavigate={setCurrentImageIndex}
+                />
+            )}
         </article>
     )
 }
